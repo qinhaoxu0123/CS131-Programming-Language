@@ -1,0 +1,36 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf100
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+Warm up \
+In the convert_grammar, we maintain the start symbol as the hw1 does except the rules, for those rules the follow the start symbol, I used rules converter that takes the rules and an empty to store all the rules, and then recursively call the rule converter function to if the start symbol is existed then we recursively call with the rest of the rules and concat the right side of rule with the empty list, otherwise we recursively call and pass in the rest of the rule list with the x. \
+\
+parse_prefix \
+To start with a simple example, I first look at the example try to get some idea of how to generate a derivation from a given fragment\
+				                         Expr\
+		         Expr \'97>  Term              Binop                   Expr  \
+                                                   |                    |                           |\
+			        Term \'97> Num      Binop\'97>\'94+\'94       Expr \'97>Term\
+				       |                     |                            |\
+				Num -> \'933\'94           +                      Term \'97> Num\
+				       |                                                 |\
+				      3	                                          Num  \'97> \'934\'94\
+									   |\
+								 	   4\
+Look at this diagram,  since it is top to bottom and  leftmost derivation, it reminds me the depth first search (DFS) algorithm, one of properties of the this algorithm is it will track all the possibilities until it finally arrive at the terminal symbol in the fragment, as it reaches the terminal symbol, then it will next for the  next term, for example, when it arrives at the Term , it will try all the rules list first before it gets find the Term \'97> [N Num], it will repeat to check for Binop and Expr until it finds all the terminal symbol in the fragment, then it will stop and return some (derivation , string), in other words, we want to traverse from top to bottom and following the leftmost derivation, since it involves a lot of backtracking to try all the possibilities, it would be beneficial to use DFS in the recursive function. In order to solve this problem, I break down into three components : \
+Initialization:  the parse_prefix will call the bt_matcher, which pass the start_symbol, original rules, and a selection rule along with the empty derivation acceptor and fragment, and will return some derivation rule list.\
+bt_matcher: this matcher will match the select rules and check it by passing in the top rule to the dfs_matcher function, which dfs_matcher will specifically check the top rule and deal with the Terminal and Nonterminal cases, whatever return from the dfs_matcher, we will match it, if it is none, then that means it did not find a match then in this case we move on to recursively call the next rules in our select rules; otherwise that means we find it, then we accept it and move.\
+df_matcher: as we mentions in the bt_matcher, this matcher deal with multiple case in our rules list, whether it select rule is empty then in our case, we just return whatever in our acceptor, but if it is a Terminal list, then we need to match it with our terminal symbol in our fragment, and recursively call on the next fragment symbol, otherwise we don\'92t find a match then will return none.  If our select rule has the nonterminal symbol then that we means we need to continue to explore the possibilities, in this case we will update the acceptor with the other rule list we call our bt_matcher to check for the suffix. \
+Problems that I run into:\
+It was great that I had a DFS idea in mind, but it ws difficult to thinking in term of the OCaml which involved with calling other function inside the recursive function. Thanks to the TA slide, it makes much clear on the HW2 specs. \
+Acceptor: it took me long time to understand how acceptor works in our functions, why I should update my acceptor when I find the N terminal symbols in our rule list and call the bt_matcher again, but this makes much more sense when I take a look on the test cases, which helps me understand the acceptor much better and with my own test case. \
+concat: this also takes me a bit of time to understand the need to update our derivation in the check suffix.\
+and: i use keyword \'93and \'93 to avoid multiple let rec in our function.\
+\
+\
+\
+}
